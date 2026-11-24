@@ -1,30 +1,50 @@
-import express from 'express';
-import cors from 'cors';
-import connectDB from './config/db.js';
-import { corsOptions } from "./config/cors.js";
-import adminRoutes from "./routes/adminRoutes.js";
-import authRoutes from './routes/authRoutes.js';
-import newsRoutes from './routes/newsRoutes.js';
-import aiRoutes from './routes/aiRoutes.js';
-import mcqRoutes from './routes/mcqRoutes.js';
-import quizRoutes from './routes/quizroutes.js';
-import bookmarkRoutes from './routes/bookmarkRoutes.js';
-import dailyQuizRoutes from './routes/dailyQuizRoutes.js';
-import dashboardRoutes from './routes/dashboardRoutes.js';
-import briefingRoutes from './routes/briefingRoutes.js';
-import dotenv from 'dotenv';
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import path from "path";
+import { existsSync } from "fs";
+import { fileURLToPath } from "url";
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendDistPath = path.resolve(
+  __dirname,
+  "../newsmania-frontend-full-integrated/dist"
+);
+const frontendIndexPath = path.join(frontendDistPath, "index.html");
+import { corsOptions } from "./config/cors.js";
+import { globalLimiter } from "./middleware/rateLimiters.js";
+import {
+  notFound,
+  errorHandler
+} from "./middleware/errorMiddleware.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import newsRoutes from "./routes/newsRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
+import mcqRoutes from "./routes/mcqRoutes.js";
+import quizRoutes from "./routes/quizroutes.js";
+import bookmarkRoutes from "./routes/bookmarkRoutes.js";
+import dailyQuizRoutes from "./routes/dailyQuizRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import briefingRoutes from "./routes/briefingRoutes.js";
+import staticGkRoutes from "./routes/staticGkRoutes.js";
 
 const app = express();
 
-app.use(express.json());
+app.set("trust proxy", 1);
 
-connectDB();
-
+app.use(helmet());
 app.use(cors(corsOptions));
+app.use(express.json({ limit: "100kb" }));
+app.use(express.static(frontendDistPath));
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ ok: true });
+});
 
 // Routes
+app.use("/api", globalLimiter);
 app.use("/api/auth", authRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/ai", aiRoutes);
@@ -35,13 +55,25 @@ app.use("/api/daily-quiz", dailyQuizRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/briefing", briefingRoutes);
+app.use("/api/static-gk", staticGkRoutes);
 
-app.get('/', (req, res) => {
-  res.send('Welcome to the Newsmania API');
+app.use((req, res, next) => {
+  if (
+    req.method !== "GET" ||
+    req.path === "/health" ||
+    req.path === "/api" ||
+    req.path.startsWith("/api/") ||
+    !req.accepts("html") ||
+    !existsSync(frontendIndexPath)
+  ) {
+    return next();
+  }
+
+  return res.sendFile(frontendIndexPath);
 });
 
-const PORT = process.env.PORT || 5000;
+// Must stay last: 404 for unknown routes, then the error responder
+app.use(notFound);
+app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+export default app;

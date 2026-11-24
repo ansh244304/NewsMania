@@ -136,11 +136,6 @@ export const fetchPIBNews = async () => {
       }
     );
 
-    console.log(
-      "PIB releases found:",
-      releases.length
-    );
-
     if (releases.length === 0) {
       throw new Error(
         "PIB listing returned no press releases"
@@ -196,10 +191,6 @@ export const fetchPIBNews = async () => {
           .trim();
 
         if (rawText.length < 120) {
-          console.log(
-            "PIB release too short, skipping:",
-            release.prid
-          );
           continue;
         }
 
@@ -294,16 +285,9 @@ export const fetchPIBNews = async () => {
 
         savedNews.push(news);
 
-        console.log(
-          "PIB Saved:",
-          news.title.slice(0, 60),
-          "|",
-          news.publishedAt.toISOString()
-        );
-
       } catch (articleError) {
 
-        console.log(
+        console.error(
           "PIB release failed:",
           release.prid,
           articleError.message
@@ -312,11 +296,6 @@ export const fetchPIBNews = async () => {
       }
 
     }
-
-    console.log(
-      "PIB new releases saved:",
-      savedNews.length
-    );
 
     return savedNews;
 

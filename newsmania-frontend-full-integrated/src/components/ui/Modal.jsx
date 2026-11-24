@@ -7,8 +7,19 @@ const FOCUSABLE =
 /**
  * Centered dialog. Closes on Escape and on an outside click,
  * moves focus inside on open and back to the trigger on close.
+ * className overrides the dialog padding, so a caller can build
+ * a full bleed dialog such as the streak celebration.
  */
-export default function Modal({ open, onClose, title, children, footer }) {
+export default function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  footer,
+  showClose = true,
+  ariaLabel = "Dialog",
+  className = "max-w-[560px] p-6"
+}) {
   const dialogRef = useRef(null);
   const titleId = "modal-title";
   const lastFocused = useRef(null);
@@ -72,29 +83,33 @@ export default function Modal({ open, onClose, title, children, footer }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
-        aria-label={title ? undefined : "Dialog"}
+        aria-label={title ? undefined : ariaLabel}
         tabIndex={-1}
-        className="max-h-[90vh] w-full max-w-[560px] overflow-y-auto rounded-2xl bg-card p-6 shadow-2xl focus:outline-none"
+        className={`max-h-[90vh] w-full overflow-y-auto rounded-2xl bg-card shadow-2xl focus:outline-none ${className}`}
       >
-        <div className="mb-4 flex items-start justify-between gap-4">
-          {title && (
-            <h2
-              id={titleId}
-              className="font-display text-xl font-bold text-ink"
-            >
-              {title}
-            </h2>
-          )}
+        {(title || showClose) && (
+          <div className="mb-4 flex items-start justify-between gap-4">
+            {title && (
+              <h2
+                id={titleId}
+                className="font-display text-xl font-bold text-ink"
+              >
+                {title}
+              </h2>
+            )}
 
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close dialog"
-            className="ml-auto grid h-11 w-11 shrink-0 place-items-center rounded-[10px] text-muted transition hover:bg-primary-soft hover:text-primary"
-          >
-            <X size={18} />
-          </button>
-        </div>
+            {showClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close dialog"
+                className="ml-auto grid h-11 w-11 shrink-0 place-items-center rounded-[10px] text-muted transition hover:bg-primary-soft hover:text-primary"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
+        )}
 
         {children}
 

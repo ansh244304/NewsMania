@@ -8,13 +8,14 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-transporter.verify((error, success) => {
-    if (error) {
-        console.log("SMTP ERROR:", error);
-    } else {
-        console.log("SMTP SERVER IS READY");
-    }
-});
+// Skip the live SMTP probe during tests so Jest can exit cleanly
+if (process.env.NODE_ENV !== "test") {
+    transporter.verify((error) => {
+        if (error) {
+            console.error("SMTP ERROR:", error);
+        }
+    });
+}
 
 export const sendEmail = async (to, subject, html) => {
     try {
@@ -25,11 +26,9 @@ export const sendEmail = async (to, subject, html) => {
             html
         });
 
-        console.log("Email sent:", info.messageId);
-
         return info;
     } catch (error) {
-        console.log("Email sending failed:", error);
+        console.error("Email sending failed:", error);
         throw error;
     }
 };

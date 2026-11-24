@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import api from "../../api/api";
 import Loading from "../../components/common/Loading";
+import { useAuth } from "../../context/AuthContext";
 
 // GNews marks its truncated preview with a trailing "... [NNNN chars]"
 const cleanContent = (content = "") =>
@@ -34,6 +35,7 @@ const chip =
 
 export default function NewsDetails() {
   const { id } = useParams();
+  const { isAuthenticated } = useAuth();
 
   const [news, setNews] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -256,19 +258,26 @@ export default function NewsDetails() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={analyze}
-              disabled={analyzing}
-              className={primaryButton}
-            >
-              {analyzing ? (
-                <Loader2 size={15} className="animate-spin" />
-              ) : (
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={analyze}
+                disabled={analyzing}
+                className={primaryButton}
+              >
+                {analyzing ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <Wand2 size={15} />
+                )}
+                {analyzing ? "Analysing..." : "Explain This"}
+              </button>
+            ) : (
+              <Link to="/login" className={primaryButton}>
                 <Wand2 size={15} />
-              )}
-              {analyzing ? "Analysing..." : "Explain This"}
-            </button>
+                Log in to Explain
+              </Link>
+            )}
           </div>
 
           {error && (

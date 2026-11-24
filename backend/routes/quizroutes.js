@@ -25,5 +25,4 @@ router.get(
   authMiddleware,
   getQuizHistoryController
 );
-
 export default router;

@@ -54,3 +54,33 @@ export const getTodayDailyQuizController = async (req, res) => {
     });
   }
 };
+
+// Rebuild today's daily quiz so newly written MCQs are included
+export const rebuildDailyQuizController = async (req, res) => {
+  try {
+    const numberOfQuestions =
+      Number(req.body?.numberOfQuestions) || 10;
+
+    const quiz = await createDailyQuiz(
+      numberOfQuestions,
+      { rebuild: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Today's daily quiz was rebuilt",
+      data: quiz
+    });
+
+  } catch (error) {
+    console.error(
+      "Rebuild Daily Quiz Error:",
+      error.message
+    );
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

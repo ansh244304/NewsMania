@@ -13,5 +13,4 @@ router.get(
   authMiddleware,
   getDailyBriefingController
 );
-
 export default router;

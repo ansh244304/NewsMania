@@ -7,7 +7,8 @@ const ADMIN_LINKS = [
   ["/admin", "Dashboard"],
   ["/admin/news", "News"],
   ["/admin/mcq", "MCQs"],
-  ["/admin/daily-quiz", "Daily Quiz"]
+  ["/admin/daily-quiz", "Daily Quiz"],
+  ["/admin/static-gk", "Static GK"]
 ];
 
 const linkClass = ({ isActive }) =>

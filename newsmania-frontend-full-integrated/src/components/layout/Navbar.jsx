@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   Bookmark,
+  BookOpen,
   Home,
   LayoutDashboard,
   LogOut,
@@ -22,6 +23,7 @@ const NAV_LINKS = [
   { to: "/", label: "Home", icon: Home, end: true },
   { to: "/briefing", label: "Daily Briefing", icon: Sunrise },
   { to: "/news", label: "Current Affairs", icon: Newspaper },
+  { to: "/static-gk", label: "Static GK", icon: BookOpen },
   { to: "/daily-quiz", label: "Daily Quiz", icon: Trophy },
   { to: "/bookmarks", label: "Bookmarks", icon: Bookmark },
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard }

@@ -13,5 +13,4 @@ router.get(
   authMiddleware,
   getDashboardController
 );
-
 export default router;

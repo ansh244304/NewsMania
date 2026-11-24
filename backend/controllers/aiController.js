@@ -18,6 +18,22 @@ export const generateNewsAnalysisController = async (req, res) => {
       });
     }
 
+    // Return the cached analysis instead of calling Gemini again
+    if (news.summary && news.facts?.length) {
+      return res.status(200).json({
+        success: true,
+        cached: true,
+        message: "AI analysis already available",
+        data: {
+          newsId: news._id,
+          summary: news.summary,
+          facts: news.facts,
+          keywords: news.keywords,
+          exams: news.exams
+        }
+      });
+    }
+
     // Check article content
     if (!news.content || news.content.trim().length === 0) {
       return res.status(400).json({

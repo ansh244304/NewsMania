@@ -17,9 +17,6 @@ const sleep = (ms) => {
 
 export const SUMMARY_WORD_COUNT = 100;
 
-const countWords = (text) =>
-  (text || "").trim().split(/\s+/).filter(Boolean).length;
-
 // Gemini does not reliably hit an exact word count, so the summary is
 // trimmed/padded programmatically to guarantee exactly 100 words.
 const normalizeToWordCount = (text, target) => {
@@ -99,15 +96,9 @@ ${content}
 
   // Try each model
   for (const model of MODELS) {
-    console.log(`Trying Gemini model: ${model}`);
-
     // Retry each model twice
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        console.log(
-          `Attempt ${attempt} using ${model}`
-        );
-
         const response = await ai.models.generateContent({
           model,
           contents: prompt,
@@ -163,10 +154,6 @@ ${content}
           SUMMARY_WORD_COUNT
         );
 
-        console.log(
-          `Gemini success using ${model} (summary: ${countWords(result.summary)} words)`
-        );
-
         return result;
 
       } catch (error) {
@@ -180,15 +167,10 @@ ${content}
 
         // Wait before retry
         if (attempt < 2) {
-          console.log("Retrying...");
           await sleep(2000);
         }
       }
     }
-
-    console.log(
-      `${model} failed. Trying next model...`
-    );
   }
 
   console.error(

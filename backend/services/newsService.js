@@ -205,29 +205,6 @@ export const fetchNewsAPI = async ({
       );
     }
 
-    console.log(
-      "================================="
-    );
-
-    console.log(
-      "Fetching news from GNews..."
-    );
-
-    console.log(
-      "Query:",
-      query
-    );
-
-    console.log(
-      "API Key exists:",
-      !!process.env.NEWS_API_KEY
-    );
-
-    console.log(
-      "================================="
-    );
-
-
     // ==================================================
     // CALL GNEWS
     // ==================================================
@@ -262,11 +239,6 @@ export const fetchNewsAPI = async ({
     const articles =
       response.data.articles || [];
 
-    console.log(
-      "GNews articles received:",
-      articles.length
-    );
-
 
     const savedNews = [];
 
@@ -290,10 +262,6 @@ export const fetchNewsAPI = async ({
           !article.url
         ) {
 
-          console.log(
-            "Skipping invalid article"
-          );
-
           continue;
         }
 
@@ -310,11 +278,6 @@ export const fetchNewsAPI = async ({
 
 
         if (existingNews) {
-
-          console.log(
-            "Already exists:",
-            article.title
-          );
 
           continue;
         }
@@ -360,12 +323,6 @@ export const fetchNewsAPI = async ({
             if (scraped.publishedAt) {
               publishedAt = scraped.publishedAt;
             }
-
-            console.log(
-              "Full text scraped:",
-              article.title.slice(0, 50),
-              `(${preview.length} -> ${content.length} chars)`
-            );
           } else {
             // Strip GNews' "... [NNNN chars]" marker so the UI
             // never shows a dangling truncation notice
@@ -425,12 +382,6 @@ export const fetchNewsAPI = async ({
 
         savedNews.push(news);
 
-
-        console.log(
-          "Saved to MongoDB:",
-          article.title
-        );
-
       } catch (articleError) {
 
         console.error(
@@ -445,20 +396,6 @@ export const fetchNewsAPI = async ({
     // ==================================================
     // FINAL RESULT
     // ==================================================
-
-    console.log(
-      "================================="
-    );
-
-    console.log(
-      "New articles saved:",
-      savedNews.length
-    );
-
-    console.log(
-      "================================="
-    );
-
 
     return savedNews;
 

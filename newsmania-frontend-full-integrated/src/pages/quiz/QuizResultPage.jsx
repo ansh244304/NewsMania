@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   ArrowRight,
@@ -8,13 +9,30 @@ import {
   Trophy,
   XCircle
 } from "lucide-react";
+import StreakCelebrationModal from "../../components/dashboard/StreakCelebrationModal";
 import { formatDuration } from "../../utils/format";
 
 export default function QuizResultPage() {
   const { state: data = {} } = useLocation();
 
+  const [celebrating, setCelebrating] = useState(false);
+
   const streak = data.streak;
   const newBadges = streak?.newBadges || [];
+  const badgeCount = newBadges.length;
+
+  const closeCelebration = useCallback(() => {
+    setCelebrating(false);
+  }, []);
+
+  // A milestone badge was just earned, so the congratulations
+  // popup opens over the result.
+  useEffect(() => {
+    if (badgeCount > 0) {
+      setCelebrating(true);
+    }
+  }, [badgeCount]);
+
   const percentage = data.percentage || 0;
   const score = data.score || 0;
   const totalQuestions = data.totalQuestions || 0;
@@ -179,6 +197,16 @@ export default function QuizResultPage() {
           </Link>
         </div>
       </div>
+
+      {/* ================= CELEBRATION ================= */}
+
+      <StreakCelebrationModal
+        open={celebrating}
+        onClose={closeCelebration}
+        badges={newBadges}
+        streak={streak?.current || 0}
+        longest={streak?.longest || 0}
+      />
     </div>
   );
 }

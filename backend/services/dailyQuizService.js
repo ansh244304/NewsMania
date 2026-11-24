@@ -7,6 +7,15 @@ import { getIstDayRange } from "./streakService.js";
 // Daily quiz is aimed at exam aspirants, so Easy questions are excluded.
 const ALLOWED_DIFFICULTIES = ["Medium", "Hard"];
 
+// AI questions must be Medium/Hard, but MCQs an admin wrote on purpose
+// are always eligible regardless of the difficulty they picked.
+const QUIZ_ELIGIBLE = {
+  $or: [
+    { difficulty: { $in: ALLOWED_DIFFICULTIES } },
+    { source: "manual" }
+  ]
+};
+
 const QUESTIONS_PER_ARTICLE = 3;
 
 // The quiz day follows IST, the same day the streak counts, so
@@ -79,17 +88,14 @@ const topUpFromRecentNews = async (
           explanation: mcq.explanation,
           difficulty: mcq.difficulty,
           exam: article.exams || [],
-          category: article.category || "Current Affairs"
+          category: article.category || "Current Affairs",
+          source: "ai"
         }))
       );
 
       created += generated.length;
-
-      console.log(
-        `Daily quiz: generated ${generated.length} ${difficulty} MCQs from "${article.title.slice(0, 50)}"`
-      );
     } catch (error) {
-      console.log(
+      console.error(
         `Daily quiz: could not generate MCQs for "${article.title.slice(0, 50)}" - ${error.message}`
       );
     }
@@ -99,7 +105,8 @@ const topUpFromRecentNews = async (
 };
 
 export const createDailyQuiz = async (
-  numberOfQuestions = 10
+  numberOfQuestions = 10,
+  { rebuild = false } = {}
 ) => {
   const startOfDay = startOfToday();
 
@@ -108,26 +115,24 @@ export const createDailyQuiz = async (
     date: startOfDay
   }).populate("mcqs");
 
-  if (existingQuiz) {
+  // A rebuild drops today's quiz so freshly written MCQs can be picked up.
+  if (existingQuiz && !rebuild) {
     return existingQuiz;
   }
 
+  if (existingQuiz && rebuild) {
+    await DailyQuiz.deleteOne({ _id: existingQuiz._id });
+  }
+
   // 2. Top up the MCQ pool from recent news if required
-  const available = await MCQ.countDocuments({
-    difficulty: { $in: ALLOWED_DIFFICULTIES }
-  });
+  const available = await MCQ.countDocuments(QUIZ_ELIGIBLE);
 
   if (available < numberOfQuestions) {
-    console.log(
-      `Daily quiz: only ${available} medium/hard MCQs available, generating more from recent news...`
-    );
     await topUpFromRecentNews(numberOfQuestions);
   }
 
-  // 3. Pull medium/hard MCQs, newest first
-  const mcqs = await MCQ.find({
-    difficulty: { $in: ALLOWED_DIFFICULTIES }
-  })
+  // 3. Pull medium/hard MCQs plus everything an admin wrote, newest first
+  const mcqs = await MCQ.find(QUIZ_ELIGIBLE)
     .sort({ createdAt: -1 })
     .limit(200);
 
@@ -137,8 +142,20 @@ export const createDailyQuiz = async (
     );
   }
 
-  // 4. Randomly select so the daily quiz is not identical every time
-  const selectedMCQs = shuffle(mcqs).slice(
+  // 4. Admin-written MCQs get first claim on the quiz so questions the
+  //    admin deliberately wrote always reach users. They are capped at
+  //    half the quiz so AI questions are still mixed in.
+  const manualSlots = Math.ceil(numberOfQuestions / 2);
+
+  const manualMCQs = shuffle(
+    mcqs.filter((mcq) => mcq.source === "manual")
+  ).slice(0, manualSlots);
+
+  const aiMCQs = shuffle(
+    mcqs.filter((mcq) => mcq.source !== "manual")
+  );
+
+  const selectedMCQs = [...manualMCQs, ...aiMCQs].slice(
     0,
     numberOfQuestions
   );
@@ -158,10 +175,6 @@ export const createDailyQuiz = async (
 
     isActive: true
   });
-
-  console.log(
-    `Daily quiz created with ${selectedMCQs.length} questions`
-  );
 
   // 6. Return populated quiz
   return await DailyQuiz.findById(

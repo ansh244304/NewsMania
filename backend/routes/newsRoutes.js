@@ -10,12 +10,17 @@ import {
   fetchNewsAPIController
 } from "../controllers/newsController.js";
 
+import authMiddleware from "../middleware/authMiddleware.js";
+import adminMiddleware from "../middleware/adminMiddleware.js";
+
 const router = express.Router();
 
 
 // Create
 router.post(
   "/",
+  authMiddleware,
+  adminMiddleware,
   createNewsController
 );
 
@@ -30,6 +35,8 @@ router.get(
 // GNews
 router.get(
   "/fetch/newsapi",
+  authMiddleware,
+  adminMiddleware,
   fetchNewsAPIController
 );
 
@@ -37,6 +44,8 @@ router.get(
 // PIB
 router.get(
   "/fetch/pib",
+  authMiddleware,
+  adminMiddleware,
   fetchPIBNewsController
 );
 
@@ -51,6 +60,8 @@ router.get(
 // Update
 router.put(
   "/:id",
+  authMiddleware,
+  adminMiddleware,
   updateNewsController
 );
 
@@ -58,8 +69,9 @@ router.put(
 // Delete
 router.delete(
   "/:id",
+  authMiddleware,
+  adminMiddleware,
   deleteNewsController
 );
-
 
 export default router;

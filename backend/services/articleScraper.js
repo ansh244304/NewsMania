@@ -121,10 +121,6 @@ export const scrapeArticle = async (url) => {
     });
 
     if (response.status !== 200 || !response.data) {
-      console.log(
-        `Scrape skipped (HTTP ${response.status}):`,
-        url
-      );
       return null;
     }
 
@@ -192,7 +188,6 @@ export const scrapeArticle = async (url) => {
     }
 
     if (!best) {
-      console.log("Scrape found no article body:", url);
       return null;
     }
 
@@ -204,7 +199,7 @@ export const scrapeArticle = async (url) => {
     };
 
   } catch (error) {
-    console.log(
+    console.error(
       "Scrape failed:",
       url,
       error.message

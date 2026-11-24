@@ -1,0 +1,8 @@
+{
+  "name": "newsmania",
+  "private": true,
+  "scripts": {
+    "build": "npm ci --prefix newsmania-frontend-full-integrated && npm run build --prefix newsmania-frontend-full-integrated && npm ci --prefix backend",
+    "start": "npm start --prefix backend"
+  }
+}

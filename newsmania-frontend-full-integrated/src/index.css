@@ -59,6 +59,77 @@
   --color-success: rgb(var(--success));
   --color-danger: rgb(var(--danger));
   --color-hero: rgb(var(--hero));
+
+  /* Streak milestone celebration */
+  --animate-celebrate-pop: celebrate-pop 0.55s
+    cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-celebrate-ring: celebrate-ring 2.2s ease-out
+    infinite;
+  --animate-celebrate-confetti: celebrate-confetti 2.6s linear
+    forwards;
+  --animate-celebrate-rise: celebrate-rise 0.45s ease-out both;
+}
+
+/* ======================================================
+   CELEBRATION KEYFRAMES
+   The reduced motion block in @layer base below turns every
+   one of these into an instant state change, so the popup
+   still reads correctly without the movement.
+   ====================================================== */
+
+@keyframes celebrate-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes celebrate-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.75;
+  }
+  70% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@keyframes celebrate-confetti {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes celebrate-rise {
+  0% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @layer base {

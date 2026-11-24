@@ -230,12 +230,6 @@ export const generateMCQs = async (
     );
   }
 
-  if (requestable < numberOfQuestions) {
-    console.log(
-      `Article has ${content.trim().length} chars, limiting to ${requestable} question(s) instead of ${numberOfQuestions}`
-    );
-  }
-
   const targetCount = requestable;
 
   const prompt = buildPrompt(
@@ -256,15 +250,9 @@ export const generateMCQs = async (
   let lastError = null;
 
   for (const model of MODELS) {
-    console.log(`\nTrying MCQ model: ${model}`);
-
     // 2 attempts per model
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        console.log(
-          `MCQ attempt ${attempt} using ${model}`
-        );
-
         const response = await ai.models.generateContent({
           model,
           contents: buildRequestPrompt,
@@ -430,15 +418,6 @@ export const generateMCQs = async (
           }
         }
 
-        if (rejected.length) {
-          console.log(
-            `Discarded ${rejected.length} low-quality MCQ(s):`
-          );
-          rejected.forEach((item) =>
-            console.log(`  - ${item.reason}`)
-          );
-        }
-
         if (valid.length < targetCount) {
           throw new Error(
             `Only ${valid.length} usable MCQ(s) from ${result.mcqs.length} generated, need ${targetCount}`
@@ -446,10 +425,6 @@ export const generateMCQs = async (
         }
 
         const selected = valid.slice(0, targetCount);
-
-        console.log(
-          `MCQs generated successfully using ${model} (${selected.length} kept, difficulty=${targetDifficulty})`
-        );
 
         return selected;
 
@@ -467,10 +442,6 @@ export const generateMCQs = async (
         }
       }
     }
-
-    console.log(
-      `${model} failed. Trying next model...`
-    );
   }
 
   console.error(

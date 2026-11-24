@@ -46,6 +46,27 @@ export default function AdminDailyQuiz() {
     }
   };
 
+  const rebuild = async () => {
+    if (
+      !window.confirm(
+        "Rebuild today's quiz? The current set of questions will be replaced with a fresh mix that includes your manual MCQs."
+      )
+    )
+      return;
+
+    setBusy(true);
+    setErr("");
+
+    try {
+      await api.post("/daily-quiz/rebuild", { numberOfQuestions: n });
+      load();
+    } catch (e) {
+      setErr(e.response?.data?.message || "Could not rebuild the daily quiz");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-3xl">
@@ -74,6 +95,20 @@ export default function AdminDailyQuiz() {
           >
             {busy ? "Creating..." : "Create Daily Quiz"}
           </button>
+
+          <button
+            type="button"
+            onClick={rebuild}
+            disabled={busy}
+            className="mt-4 ml-3 inline-flex h-11 items-center rounded-[10px] border border-line bg-card px-5 text-sm font-semibold text-ink transition duration-150 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Rebuild Today&apos;s Quiz
+          </button>
+
+          <p className="mt-3 text-xs text-muted">
+            Newly written MCQs are mixed into the daily quiz. Rebuild to
+            include them in today&apos;s quiz right away.
+          </p>
         </div>
 
         {err && (

@@ -2,6 +2,10 @@ import express from "express";
 
 import authController from "../controllers/authController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
+import {
+    authLimiter,
+    emailLimiter
+} from "../middleware/rateLimiters.js";
 
 const {
     register,
@@ -20,15 +24,15 @@ const {
 const router = express.Router();
 
 // Register, then confirm the emailed code
-router.post("/register", register);
-router.post("/verify-email", verifyEmail);
-router.post("/resend-verification", resendVerification);
+router.post("/register", authLimiter, register);
+router.post("/verify-email", authLimiter, verifyEmail);
+router.post("/resend-verification", emailLimiter, resendVerification);
 
 // Google popup credential in, normal session out
-router.post("/google", googleLogin);
+router.post("/google", authLimiter, googleLogin);
 
 // Login
-router.post("/login", login);
+router.post("/login", authLimiter, login);
 
 // Access tokens expire, so a stored refresh token trades for a
 // fresh pair (rotation happens server side)
@@ -42,12 +46,11 @@ router.post("/logout", logout);
 router.get("/me", authMiddleware, me);
 
 // Forgot password
-router.post("/forgot-password", forgotPassword);
+router.post("/forgot-password", emailLimiter, forgotPassword);
 
 // Reset password
-router.post("/reset-password", resetPassword);
+router.post("/reset-password", authLimiter, resetPassword);
 
 // Change password while signed in
 router.post("/change-password", authMiddleware, changePassword);
-
 export default router;

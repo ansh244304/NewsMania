@@ -30,5 +30,4 @@ router.delete(
   authMiddleware,
   removeBookmarkController
 );
-
 export default router;
