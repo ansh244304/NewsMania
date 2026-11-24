@@ -103,5 +103,6 @@ set and exits with a clear message if any are missing. It also requires
 
 For the combined Render service, set both `FRONTEND_URL` and `CORS_ORIGINS`
 to the service origin (for example, `https://newsmania-dfel.onrender.com`).
+`FRONTEND_URL` is also allowed by the API CORS policy.
 The root `npm run build` command builds the Vite app and installs backend
 dependencies; `npm start` starts the API, which serves the generated frontend.

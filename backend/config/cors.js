@@ -30,6 +30,13 @@ const configuredOrigins = (process.env.CORS_ORIGINS || "")
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
+const frontendOrigin = process.env.FRONTEND_URL
+    ? new URL(process.env.FRONTEND_URL).origin
+    : null;
+const allowedOrigins = new Set([
+    ...configuredOrigins,
+    ...(frontendOrigin ? [frontendOrigin] : [])
+]);
 
 export const corsOptions = {
     origin(origin, callback) {
@@ -39,11 +46,11 @@ export const corsOptions = {
             return callback(null, true);
         }
 
-        if (configuredOrigins.includes(origin)) {
+        if (allowedOrigins.has(origin)) {
             return callback(null, true);
         }
 
-        if (!configuredOrigins.length && isLoopbackOrigin(origin)) {
+        if (!allowedOrigins.size && isLoopbackOrigin(origin)) {
             return callback(null, true);
         }
 
